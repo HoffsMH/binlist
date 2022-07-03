@@ -13,16 +13,26 @@ func main() {
 
 	pathstring := os.Getenv("PATH")
 	paths := strings.Split(pathstring, ":")
-	x := make(map[string]void)
+	binset := make(map[string]void)
 
 	for _, path := range paths {
-		execs, _ := os.ReadDir(path)
-		for _, executable := range execs {
-			x[executable.Name()] = member
+		entries, _ := os.ReadDir(path)
+		for _, entry := range entries {
+			if !entry.IsDir() {
+				info, _ := entry.Info()
+
+				if IsExecAny(info.Mode()) {
+					binset[entry.Name()] = member
+				}
+			}
 		}
 	}
 
-	for k := range x {
+	for k := range binset {
 		fmt.Println(k)
 	}
+}
+
+func IsExecAny(mode os.FileMode) bool {
+	return mode&0111 != 0
 }
